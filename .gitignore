@@ -13,6 +13,11 @@ reports/
 node_modules/
 target/
 
+# Build
+dist/
+coverage/
+*.tsbuildinfo
+
 # IDE
 .vscode/
 .idea/
