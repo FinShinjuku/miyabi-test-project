@@ -1,0 +1,224 @@
+# Miyabi Label System - 53 Labels
+# Auto-generated label definitions for GitHub label sync
+
+# 1. STATE LABELS (8)
+- name: "📥 state:pending"
+  color: "8B949E"
+  description: "Issue created, awaiting triage"
+
+- name: "🔍 state:analyzing"
+  color: "1D76DB"
+  description: "CoordinatorAgent analyzing dependencies and complexity"
+
+- name: "🏗️ state:implementing"
+  color: "FBCA04"
+  description: "Specialist Agents actively working on implementation"
+
+- name: "👀 state:reviewing"
+  color: "FB8500"
+  description: "ReviewAgent conducting quality checks"
+
+- name: "✅ state:done"
+  color: "2EA44F"
+  description: "Completed successfully, merged to main"
+
+- name: "🔴 state:blocked"
+  color: "D73A4A"
+  description: "Blocked, requires Guardian intervention"
+
+- name: "🛑 state:failed"
+  color: "B60205"
+  description: "Execution failed, error occurred"
+
+- name: "⏸️ state:paused"
+  color: "8B88FF"
+  description: "Paused, waiting for dependencies or approval"
+
+# 2. AGENT ASSIGNMENT LABELS (6)
+- name: "🤖 agent:coordinator"
+  color: "FF79C6"
+  description: "Assigned to CoordinatorAgent"
+
+- name: "🤖 agent:codegen"
+  color: "00D9FF"
+  description: "Assigned to CodeGenAgent"
+
+- name: "🤖 agent:review"
+  color: "00FF88"
+  description: "Assigned to ReviewAgent"
+
+- name: "🤖 agent:issue"
+  color: "8B88FF"
+  description: "Assigned to IssueAgent"
+
+- name: "🤖 agent:pr"
+  color: "FF79C6"
+  description: "Assigned to PRAgent"
+
+- name: "🤖 agent:deployment"
+  color: "FF4444"
+  description: "Assigned to DeploymentAgent"
+
+# 3. PRIORITY LABELS (4)
+- name: "🔥 priority:P0-Critical"
+  color: "B60205"
+  description: "Critical priority - immediate action required"
+
+- name: "⚠️ priority:P1-High"
+  color: "D93F0B"
+  description: "High priority - handle soon"
+
+- name: "📊 priority:P2-Medium"
+  color: "FBCA04"
+  description: "Medium priority - normal timeline"
+
+- name: "📝 priority:P3-Low"
+  color: "0E8A16"
+  description: "Low priority - nice to have"
+
+# 4. TYPE LABELS (7)
+- name: "✨ type:feature"
+  color: "00D9FF"
+  description: "New feature or enhancement"
+
+- name: "🐛 type:bug"
+  color: "D73A4A"
+  description: "Bug fix"
+
+- name: "📚 type:docs"
+  color: "0075CA"
+  description: "Documentation update"
+
+- name: "🔧 type:refactor"
+  color: "FBCA04"
+  description: "Code refactoring"
+
+- name: "🧪 type:test"
+  color: "00FF88"
+  description: "Test-related changes"
+
+- name: "🏗️ type:architecture"
+  color: "8B88FF"
+  description: "Architectural changes"
+
+- name: "🚀 type:deployment"
+  color: "FF4444"
+  description: "Deployment-related"
+
+# 5. SEVERITY LABELS (4)
+- name: "🚨 severity:Sev.1-Critical"
+  color: "B60205"
+  description: "Critical severity - system down"
+
+- name: "⚠️ severity:Sev.2-High"
+  color: "D93F0B"
+  description: "High severity - major functionality impaired"
+
+- name: "📊 severity:Sev.3-Medium"
+  color: "FBCA04"
+  description: "Medium severity - workaround available"
+
+- name: "📝 severity:Sev.4-Low"
+  color: "0E8A16"
+  description: "Low severity - minor issue"
+
+# 6. PHASE LABELS (5)
+- name: "🎯 phase:planning"
+  color: "D4C5F9"
+  description: "Planning phase"
+
+- name: "🏗️ phase:implementation"
+  color: "1D76DB"
+  description: "Implementation phase"
+
+- name: "🧪 phase:testing"
+  color: "00FF88"
+  description: "Testing phase"
+
+- name: "🚀 phase:deployment"
+  color: "FF4444"
+  description: "Deployment phase"
+
+- name: "📊 phase:monitoring"
+  color: "0E8A16"
+  description: "Monitoring and maintenance phase"
+
+# 7. SPECIAL OPERATION LABELS (7)
+- name: "🔐 security"
+  color: "B60205"
+  description: "Security-related issue"
+
+- name: "💰 cost-watch"
+  color: "FBCA04"
+  description: "Watch for cost implications"
+
+- name: "🔄 dependencies"
+  color: "8B88FF"
+  description: "Related to dependencies"
+
+- name: "🎓 learning"
+  color: "7057FF"
+  description: "Learning or experimentation"
+
+- name: "🔬 experiment"
+  color: "D4C5F9"
+  description: "Experimental feature"
+
+- name: "🚫 wontfix"
+  color: "E4E4E4"
+  description: "Will not be fixed"
+
+- name: "🔁 duplicate"
+  color: "CFD3D7"
+  description: "Duplicate issue"
+
+# 8. AUTOMATED TRIGGER LABELS (4)
+- name: "🤖 trigger:agent-execute"
+  color: "FF79C6"
+  description: "Trigger agent execution"
+
+- name: "📊 trigger:generate-report"
+  color: "0E8A16"
+  description: "Trigger report generation"
+
+- name: "🚀 trigger:deploy-staging"
+  color: "FBCA04"
+  description: "Trigger staging deployment"
+
+- name: "🚀 trigger:deploy-production"
+  color: "D73A4A"
+  description: "Trigger production deployment"
+
+# 9. QUALITY LABELS (4)
+- name: "⭐ quality:excellent"
+  color: "2EA44F"
+  description: "Quality score: 90-100"
+
+- name: "✅ quality:good"
+  color: "00FF88"
+  description: "Quality score: 80-89"
+
+- name: "⚠️ quality:needs-improvement"
+  color: "FBCA04"
+  description: "Quality score: 60-79"
+
+- name: "🔴 quality:poor"
+  color: "D73A4A"
+  description: "Quality score: <60"
+
+# 10. COMMUNITY LABELS (4)
+- name: "👋 good-first-issue"
+  color: "7057FF"
+  description: "Good for newcomers"
+
+- name: "🙏 help-wanted"
+  color: "0E8A16"
+  description: "Extra attention needed"
+
+- name: "❓ question"
+  color: "D4C5F9"
+  description: "Further information requested"
+
+- name: "💬 discussion"
+  color: "D4C5F9"
+  description: "Discussion topic"
