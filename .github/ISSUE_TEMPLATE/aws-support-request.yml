@@ -1,0 +1,120 @@
+name: AWS サポート問い合わせ
+description: AWSサポートへの問い合わせを自動生成します
+title: "[AWS Support] "
+labels: ["aws-support", "📊 priority:P2-Medium"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## AWSサポート問い合わせ自動生成
+
+        このフォームに記入すると、AIが自動的にAWSサポート向けの問い合わせ文を生成します。
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: 問い合わせカテゴリ
+      description: 問い合わせの種類を選択してください
+      options:
+        - 障害調査
+        - 技術質問
+        - ベストプラクティス相談
+        - パフォーマンス改善
+        - セキュリティ相談
+        - その他
+    validations:
+      required: true
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: 重要度
+      description: 問い合わせの緊急度を選択してください
+      options:
+        - Critical（緊急）
+        - High（高）
+        - Normal（通常）
+        - Low（低）
+    validations:
+      required: true
+
+  - type: input
+    id: aws_service
+    attributes:
+      label: 対象AWSサービス
+      description: 問い合わせ対象のAWSサービス名（例: EC2, RDS, Lambda）
+      placeholder: "EC2"
+    validations:
+      required: true
+
+  - type: textarea
+    id: issue_summary
+    attributes:
+      label: 事象の概要
+      description: 発生している問題や質問内容を簡潔に記述してください
+      placeholder: "EC2インスタンスが起動しない問題が発生しています"
+    validations:
+      required: true
+
+  - type: textarea
+    id: detailed_description
+    attributes:
+      label: 詳細説明
+      description: 事象の詳細、発生日時、影響範囲などを記述してください
+      placeholder: |
+        - 発生日時: 2025-10-24 10:00 JST
+        - 影響範囲: 本番環境のWebサーバー3台
+        - エラーメッセージ: "InsufficientInstanceCapacity"
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction_steps
+    attributes:
+      label: 再現手順
+      description: 問題を再現するための手順（該当する場合）
+      placeholder: |
+        1. EC2コンソールから新規インスタンスを起動
+        2. インスタンスタイプ t3.large を選択
+        3. 起動ボタンをクリック
+        4. エラーが発生
+    validations:
+      required: false
+
+  - type: textarea
+    id: attempted_solutions
+    attributes:
+      label: 試した対処方法
+      description: これまでに試した対処方法があれば記述してください
+      placeholder: |
+        - 別のAvailability Zoneで試行 → 同じエラー
+        - インスタンスタイプをt3.mediumに変更 → 改善せず
+    validations:
+      required: false
+
+  - type: input
+    id: aws_account_id
+    attributes:
+      label: AWSアカウントID（任意）
+      description: 問題が発生しているAWSアカウントID（12桁）
+      placeholder: "123456789012"
+    validations:
+      required: false
+
+  - type: input
+    id: region
+    attributes:
+      label: リージョン
+      description: 問題が発生しているAWSリージョン
+      placeholder: "ap-northeast-1"
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional_info
+    attributes:
+      label: 補足情報
+      description: その他、参考になる情報があれば記述してください
+      placeholder: "CloudWatch Logsのログ、スクリーンショットのURLなど"
+    validations:
+      required: false

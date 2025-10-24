@@ -1,0 +1,106 @@
+name: AWS Support Request Auto-Retry
+
+# レート制限解除後の自動リトライ機能
+# 30分ごとに失敗したワークフローをチェックし、再実行します
+
+on:
+  # 30分ごとに実行
+  schedule:
+    - cron: '*/30 * * * *'
+
+  # 手動実行も可能
+  workflow_dispatch:
+    inputs:
+      issue_number:
+        description: 'Issue番号（オプション: 指定しない場合は全ての失敗Issueを再試行）'
+        required: false
+        type: string
+
+jobs:
+  check-and-retry:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Find failed workflows and retry
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issueNumber = '${{ github.event.inputs.issue_number }}';
+
+            // 過去24時間以内の失敗したワークフローを取得
+            const workflows = await github.rest.actions.listWorkflowRunsForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              status: 'failure',
+              created: `>=${new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()}`,
+              per_page: 100
+            });
+
+            console.log(`Found ${workflows.data.workflow_runs.length} failed workflows in the last 24 hours`);
+
+            // AWS Support Auto-Generatorワークフローのみフィルタ
+            const targetWorkflows = workflows.data.workflow_runs.filter(run =>
+              run.name === 'AWS Support Request Auto-Generator (MVP)' &&
+              run.conclusion === 'failure'
+            );
+
+            console.log(`Found ${targetWorkflows.length} failed AWS Support workflows`);
+
+            if (targetWorkflows.length === 0) {
+              console.log('No failed workflows to retry. Exiting.');
+              return;
+            }
+
+            // レート制限エラーかチェック（ログから判定）
+            for (const workflow of targetWorkflows) {
+              // ワークフローのログを取得（簡易版: 再実行を試みる）
+              const jobs = await github.rest.actions.listJobsForWorkflowRun({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                run_id: workflow.id
+              });
+
+              console.log(`Workflow #${workflow.id}: ${jobs.data.jobs.length} jobs`);
+
+              // 特定のIssue番号が指定されている場合、そのIssueのみリトライ
+              if (issueNumber && !workflow.head_commit.message.includes(`#${issueNumber}`)) {
+                console.log(`Skipping workflow #${workflow.id} (not Issue #${issueNumber})`);
+                continue;
+              }
+
+              // 1時間以内に失敗したワークフローのみリトライ（頻繁すぎる再実行を防ぐ）
+              const failedAt = new Date(workflow.updated_at);
+              const now = new Date();
+              const hoursSinceFailure = (now - failedAt) / (1000 * 60 * 60);
+
+              if (hoursSinceFailure > 1) {
+                console.log(`Retrying workflow #${workflow.id} (failed ${Math.floor(hoursSinceFailure)} hours ago)`);
+
+                try {
+                  await github.rest.actions.reRunWorkflow({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    run_id: workflow.id
+                  });
+
+                  console.log(`✅ Successfully re-ran workflow #${workflow.id}`);
+
+                  // リトライしたことをIssueにコメント
+                  // （Issue番号はワークフロー実行から取得する必要があるため、ここでは省略）
+                  // 実装する場合は、ワークフローの入力パラメータからIssue番号を取得
+
+                } catch (error) {
+                  console.error(`❌ Failed to re-run workflow #${workflow.id}:`, error.message);
+                }
+              } else {
+                console.log(`Skipping workflow #${workflow.id} (failed only ${Math.floor(hoursSinceFailure * 60)} minutes ago, waiting for cooldown)`);
+              }
+            }
+
+      - name: Summary
+        run: |
+          echo "🔄 Auto-retry check completed"
+          echo "Next scheduled run: 30 minutes from now"

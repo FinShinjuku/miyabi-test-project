@@ -1,0 +1,61 @@
+name: AWS Support Request Auto-Generator (MVP)
+
+on:
+  issues:
+    types: [opened, edited]
+
+jobs:
+  generate-support-request:
+    # aws-supportラベルが付いたIssueのみ処理
+    if: contains(github.event.issue.labels.*.name, 'aws-support')
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Generate AWS Support Request
+        env:
+          ISSUE_BODY: ${{ github.event.issue.body }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # AI API Key (OpenAI or Claude)
+          # GitHub Secretsに設定してください
+          AI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          # または Claude API使用時:
+          # AI_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          # AI_PROVIDER: claude
+          AI_PROVIDER: openai
+        run: |
+          chmod +x scripts/generate-aws-support-request.js
+          node scripts/generate-aws-support-request.js
+
+      - name: Add label
+        if: success()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.addLabels({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              labels: ['🤖 ai-generated']
+            });
+
+      - name: Handle error
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '❌ AWSサポート問い合わせ文の自動生成に失敗しました。\n\nエラーログを確認してください: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}'
+            });
