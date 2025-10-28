@@ -1,0 +1,132 @@
+name: AWS Support Case Sync
+
+# AWSサポートケースとGitHub Issueを双方向同期
+#
+# トリガー:
+# 1. Issue作成時: AWSケース自動起票
+# 2. 15分ごと: ケース状態監視・回答同期
+# 3. Issueコメント追加時: AWS返信送信
+
+on:
+  # Issue作成時・編集時
+  issues:
+    types: [opened, edited]
+
+  # Issueコメント追加時
+  issue_comment:
+    types: [created]
+
+  # 定期実行（15分ごと）
+  schedule:
+    - cron: '*/15 * * * *'
+
+  # 手動実行
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'Action to perform'
+        required: true
+        type: choice
+        options:
+          - create-case
+          - monitor-cases
+          - send-reply
+
+jobs:
+  # Job 1: AWSケース自動起票
+  create-case:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'issues' && github.event.action == 'opened' && contains(github.event.issue.labels.*.name, 'aws-support')
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Create AWS Support Case
+        env:
+          ISSUE_BODY: ${{ github.event.issue.body }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          AWS_PROFILE: default
+          MOCK_MODE: 'true' # AWS Support プランがない場合はモックモード
+        run: |
+          node scripts/create-support-case.js
+
+  # Job 2: ケース監視・回答同期（定期実行）
+  monitor-cases:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'monitor-cases')
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Monitor AWS Support Cases
+        env:
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          AWS_PROFILE: default
+          MOCK_MODE: 'true' # AWS Support プランがない場合はモックモード
+        run: |
+          node scripts/monitor-cases.js
+
+  # Job 3: Issueコメントから返信送信
+  send-reply:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'issue_comment' && github.event.action == 'created' && contains(github.event.comment.body, '/reply')
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Extract Case ID from Issue
+        id: extract-case-id
+        uses: actions/github-script@v7
+        with:
+          script: |
+            // IssueコメントからCase IDを抽出
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number
+            });
+
+            // "Case ID: `case-xxx`" のパターンを探す
+            for (const comment of comments) {
+              const match = comment.body.match(/Case ID:\s*`([^`]+)`/);
+              if (match) {
+                core.setOutput('case_id', match[1]);
+                console.log(`Found Case ID: ${match[1]}`);
+                return match[1];
+              }
+            }
+
+            core.setFailed('Case ID not found in Issue comments');
+
+      - name: Send Reply to AWS Support
+        env:
+          COMMENT_BODY: ${{ github.event.comment.body }}
+          CASE_ID: ${{ steps.extract-case-id.outputs.case_id }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          AWS_PROFILE: default
+          MOCK_MODE: 'true' # AWS Support プランがない場合はモックモード
+        run: |
+          node scripts/reply-to-case.js
